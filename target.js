@@ -10,7 +10,7 @@ class Target {
     ellipse(this.location.x,this.location.y,this.size,this.size);
   }
 
-  distanceTo(mover) {
-    return p5.Vector.sub(this.location,mover.location).mag()
+  distanceTo(location) {
+    return p5.Vector.dist(this.location,location);
   }
 }

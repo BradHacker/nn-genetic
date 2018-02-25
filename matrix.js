@@ -40,7 +40,6 @@ class Matrix {
     return arr;
   }
 
-
   randomize() {
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.cols; j++) {
@@ -139,5 +138,16 @@ class Matrix {
 
   print() {
     console.table(this.data);
+  }
+
+  draw(x,y) {
+    for(let i = 0; i < this.rows; i++) {
+      let rowText = "[ ";
+      for(let j = 0; j < this.cols - 1; j++) {
+        rowText += this.data[i][j].toFixed(3) + " , ";
+      }
+      rowText += this.data[i][this.cols-1].toFixed(3) + " ]"
+      text(rowText, x, y+i*15);
+    }
   }
 }
