@@ -6,7 +6,7 @@ class Target {
 
   draw() {
     noStroke();
-    fill(120);
+    fill(0);
     ellipse(this.location.x,this.location.y,this.size,this.size);
   }
 

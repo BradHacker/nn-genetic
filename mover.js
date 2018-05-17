@@ -22,16 +22,20 @@ class Mover {
     stroke(0);
     strokeWeight(1);
     ellipse(this.location.x, this.location.y, this.size, this.size);
+  }
 
-    stroke(0,60)
+  drawDistances() {
+    let s = this.size/2
+    stroke(200)
     //stroke(0, this.calcAlpha(this.leftDistance,400));
-    line(this.location.x, this.location.y, this.location.x-this.leftDistance, this.location.y);
+    line(this.location.x-this.size/2, this.location.y, this.location.x-this.leftDistance, this.location.y);
     //stroke(0, this.calcAlpha(this.rightDistance,400));
-    line(this.location.x, this.location.y, this.location.x+this.rightDistance, this.location.y);
+    line(this.location.x+this.size/2, this.location.y, this.location.x+this.rightDistance, this.location.y);
     //stroke(0, this.calcAlpha(this.forwardDistance,600));
-    line(this.location.x, this.location.y, this.location.x, this.location.y-this.forwardDistance);
+    line(this.location.x, this.location.y-this.size/2, this.location.x, this.location.y-this.forwardDistance);
+    line(this.location.x-s, this.location.y-this.forwardDistance, this.location.x+s, this.location.y-this.forwardDistance);
     //stroke(0, this.calcAlpha(this.backwardDistance,600));
-    line(this.location.x, this.location.y, this.location.x, this.location.y+this.backwardDistance);
+    line(this.location.x, this.location.y+this.size/2, this.location.x, this.location.y+this.backwardDistance);
   }
 
   update(newLocation, target, obstacle) {
@@ -45,7 +49,7 @@ class Mover {
       this.backwardDistance = Math.abs(hallwayLength-this.location.y);
 
       let s = this.size/2;
-      if(this.location.x > obstacle.start.x && this.location.x - s < obstacle.end.x) {
+      if(this.location.x + s > obstacle.start.x && this.location.x - s < obstacle.end.x) {
         if(this.location.y > obstacle.start.y) {
           this.forwardDistance = Math.abs(obstacle.start.y-this.location.y);
         } else {
@@ -53,7 +57,7 @@ class Mover {
         }
       }
 
-      if(this.leftDistance < s || this.rightDistance < s || this.forwardDistance < s || this.backwardDistance < s) {
+      if(this.leftDistance <= s || this.rightDistance <= s || this.forwardDistance <= s || this.backwardDistance <= s) {
         this.alive = false;
         //console.log(this.timeAlive)
       }
@@ -71,7 +75,7 @@ class Mover {
     let distance = (this.distanceTo(target)*3)/distanceToCorner;
     this.fitness = -(1/3) * Math.pow(distance,2) + 4;
     if(!this.alive) {
-      this.fitness *= 0.1;
+      this.fitness *= 0.08;
     }
     if(this.reachedTarget) {
       this.fitness *= 4;
@@ -142,8 +146,7 @@ class Mover {
     let child = new Mover(this.hallwayWidth,this.hallwayLength);
     let randomMid;
 
-    randomMid = floor(random(0,this.nn.weights_ih.rows*this.nn.weights_ih.cols));
-    //console.log(randomMid);
+    randomMid = Math.round(random(0,this.nn.weights_ih.rows*this.nn.weights_ih.cols));
     //select random vals form parents for weights_ih
     for(let i = 0; i < this.nn.weights_ih.data.length; i++) {
       for(let j = 0; j < this.nn.weights_ih.data[i].length; j++) {
@@ -157,18 +160,27 @@ class Mover {
       }
     }
 
+    randomMid = Math.round(random(0,this.nn.bias_h.rows*this.nn.bias_h.cols));
     //select random vals form parents for bias_h
     for(let i = 0; i < this.nn.bias_h.data.length; i++) {
       for(let j = 0; j < this.nn.bias_h.data[i].length; j++) {
-        if(random(0,2) < 1) {
-          child.nn.bias_h.data[i][j] = this.nn.bias_h.data[i][j];
+        if(this.nn.bias_h.rows*this.nn.bias_h.cols > 1) {
+          if(this.nn.bias_h.cols*i + j < randomMid) {
+            child.nn.bias_h.data[i][j] = this.nn.bias_h.data[i][j];
+          } else {
+            child.nn.bias_h.data[i][j] = partner.nn.bias_h.data[i][j];
+          }
         } else {
-          child.nn.bias_h.data[i][j] = partner.nn.bias_h.data[i][j];
+          if(random(0,2) < 1) {
+            child.nn.bias_h.data[i][j] = this.nn.bias_h.data[i][j];
+          } else {
+            child.nn.bias_h.data[i][j] = partner.nn.bias_h.data[i][j];
+          }
         }
       }
     }
 
-    randomMid = floor(random(0,this.nn.weights_ho.rows*this.nn.weights_ho.cols));
+    randomMid = Math.round(random(0,this.nn.weights_ho.rows*this.nn.weights_ho.cols));
     //select random vals form parents for weights_ho
     for(let i = 0; i < this.nn.weights_ho.data.length; i++) {
       for(let j = 0; j < this.nn.weights_ho.data[i].length; j++) {
@@ -180,13 +192,22 @@ class Mover {
       }
     }
 
+    randomMid = Math.round(random(0,this.nn.bias_o.rows*this.nn.bias_o.cols));
     //select random vals form parents for bias_o
     for(let i = 0; i < this.nn.bias_o.data.length; i++) {
       for(let j = 0; j < this.nn.bias_o.data[i].length; j++) {
-        if(random(0,2) < 1) {
-          child.nn.bias_o.data[i][j] = this.nn.bias_o.data[i][j];
+        if(this.nn.bias_o.rows*this.nn.bias_o.cols > 1) {
+          if(this.nn.bias_o.cols*i + j < randomMid) {
+            child.nn.bias_o.data[i][j] = this.nn.bias_o.data[i][j];
+          } else {
+            child.nn.bias_o.data[i][j] = partner.nn.bias_o.data[i][j];
+          }
         } else {
-          child.nn.bias_o.data[i][j] = partner.nn.bias_o.data[i][j];
+          if(random(0,2) < 1) {
+            child.nn.bias_o.data[i][j] = this.nn.bias_o.data[i][j];
+          } else {
+            child.nn.bias_o.data[i][j] = partner.nn.bias_o.data[i][j];
+          }
         }
       }
     }
